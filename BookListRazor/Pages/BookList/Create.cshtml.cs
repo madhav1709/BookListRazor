@@ -5,38 +5,36 @@ using System.Threading.Tasks;
 using BookListRazor.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 
 namespace BookListRazor
 {
-    public class IndexModel : PageModel
+    public class CreateModel : PageModel
     {
         private readonly ApplicationDbContext _db;
-
-        public IndexModel(ApplicationDbContext db)
+        public CreateModel(ApplicationDbContext db)
         {
             _db = db;
         }
-        public IEnumerable<Book> Books { get; set; }
 
         [TempData]
         public string Message { get; set; }
-
-        public async Task OnGet()
+        [BindProperty]
+        public Book Book { get; set; }
+        public void OnGet()
         {
-            Books = await _db.Book.ToListAsync();
+
         }
-
-        public async Task<IActionResult> OnPostDelete(int id)
+        
+        public async Task<IActionResult> OnPost()
         {
-            var book = await _db.Book.FindAsync(id);
-            if(book == null)
+            if(!ModelState.IsValid)
             {
-                return NotFound();
+                return Page();
             }
-            _db.Book.Remove(book);
+
+            _db.Book.Add(Book);
             await _db.SaveChangesAsync();
-            Message = "Book Deleted successfully";
+            Message = "Book Created Successfully";
             return RedirectToPage("Index");
         }
     }
